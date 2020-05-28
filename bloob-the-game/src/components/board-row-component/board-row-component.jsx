@@ -2,8 +2,8 @@ import React from 'react';
 import { Card } from './../card-component/card-component'
 
 export const BoardRow = (props) => {
-    var classNames = 'row' + '-' + props.space;
-    var space = parseInt(props.space) * 200;
+    var classNames = 'row';
+    var space = parseInt(props.space) * 174;
     if(props.even === 'true'){
         classNames = classNames + ' even';
         space = space + 87;
@@ -14,7 +14,7 @@ export const BoardRow = (props) => {
     }
 
     space = space + 'px'
-    return  <div className={classNames} style={{'margin-left': {space}}}>
+    return  <div className={classNames} style={{marginLeft: `${space}`}}>
                 {cards}
             </div>
 
