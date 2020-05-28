@@ -3,10 +3,9 @@ import { Card } from './../card-component/card-component'
 
 export const BoardRow = (props) => {
     var classNames = 'row';
-    var space = parseInt(props.space) * 174;
+    var space = parseInt(props.space) * 87;
     if(props.even === 'true'){
         classNames = classNames + ' even';
-        space = space + 87;
     }
     const cards = [];
     for(const [index, value] of props.cards.entries()){
