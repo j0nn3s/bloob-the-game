@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react';
 import { BoardRow } from './../board-row-component/board-row-component'
 import "./board-component.css"
+import {Card} from "../card-component/card-component";
 
 
 export class Board extends React.Component {
@@ -12,43 +13,57 @@ export class Board extends React.Component {
             dimensions: {
                 width: 0,
                 height: 0,
-            }
+            },
+            cardsStates: []
         };
-        this.convertCardRowsInBoardRows = this.convertCardRowsInBoardRows.bind(this);
     }
 
     componentDidMount() {
-        //console.log(this.myBoard.current.offsetWidth)
-        //console.log(this.container.offsetWidth);
-
         this.setState({
             dimensions: {
                 width: this.container.offsetWidth,
                 height: this.container.offsetHeight,
             },
         });
+
+        var lengthStartRowInt = parseInt(this.props.lengthStartRow);
+        this.setState({
+            cardsStates: this.generateCardStates(lengthStartRowInt)
+        });
+    }
+
+    handleCardClick = (rowIndex, columnIndex) => {
+        var qualifiedCards = this.state.cardsStates.filter(card => card.rowIndex === rowIndex).filter(card => card.columnIndex === columnIndex);
+        this.setState(qualifiedCards.map(card => card.visible = !card.visible));
+        console.log("Clicked on: " + rowIndex + ", " + columnIndex);
     }
 
     render() {
-
         var lengthStartRowInt = parseInt(this.props.lengthStartRow);
 
-        var cardRows = generateDummyCardRows(lengthStartRowInt);
-
-        var scaleFactor = this.calculateScaleFactor(lengthStartRowInt, this.state.dimensions.width);
-
-        var boardRowArray = this.convertCardRowsInBoardRows(cardRows, scaleFactor);
-
-        var absoluteHeight = 200 * lengthStartRowInt + 100 * (lengthStartRowInt - 1);
+        var absoluteHeight = 200 + (150 * (lengthStartRowInt*2-2));
         var absoluteWidth = (174 * (lengthStartRowInt*2-1));
-        var scaleString = "scale(" + scaleFactor + ")";
         var cssString = {
-            transform: scaleString,
             height: absoluteHeight,
             width: absoluteWidth
         }
 
-        return <div className="board-container" ref={el => (this.container = el)}>
+        var maxRowLength = 2*this.props.lengthStartRow-1;
+        var boardRowArray = [];
+        var evenFlagString;
+        var spaceAmount;
+        for (var k=0; k<maxRowLength;k++) {
+            var rowCardStates = this.state.cardsStates.filter(card => card.rowIndex === k);
+            evenFlagString = k % 2 === 1 ? "true": "false";
+            spaceAmount = maxRowLength - rowCardStates.length;
+            boardRowArray.push(<BoardRow key={"row_" + k}
+                                         cardStates={rowCardStates}
+                                         evenFlag={evenFlagString}
+                                         spaceAmount={spaceAmount}
+                                         onClickFunction={this.handleCardClick}/>);
+        }
+
+        return <div className="board-container" ref={el => (this.container = el)} style={{height: window.innerHeight}}>
             <div style={cssString}>
                 {boardRowArray}
             </div>
@@ -56,57 +71,36 @@ export class Board extends React.Component {
 
     }
 
-    convertCardRowsInBoardRows(cardRows, scaleFactor) {
-        var boardRowArray = [];
-
-        var x;
-        var evenFlagString;
-        var spaceAmount;
-
-        for (x=0; x<cardRows.length; x++) {
-            evenFlagString = x % 2 === 1 ? "true": "false";
-            spaceAmount = cardRows.length - cardRows[x].length;
-            boardRowArray.push( <BoardRow cards={cardRows[x]}
-                                          space={spaceAmount}
-                                          even={evenFlagString}
-                                          scaleFactor={scaleFactor}/> );
+     generateCardStates = (lengthStartRow) => {
+        var cardStates = [];
+        var numberOfCards;
+        var i;
+        var j;
+        //first row until 'equator' row included
+        for (i = 0; i < lengthStartRow; i++) {
+            numberOfCards = lengthStartRow + i;
+            for (j = 0; j < numberOfCards; j++) {
+                cardStates.push( this.generateCardState(i, j) );
+            }
         }
-
-        return boardRowArray;
-    }
-
-    calculateScaleFactor(lengthStartRowInt, width) {
-        var maximumRowCardCount = (lengthStartRowInt * 2) - 1;
-        var maximumRowCardWidthTotal = (maximumRowCardCount * 174) + maximumRowCardCount;
-        return (width - 0) / maximumRowCardWidthTotal;
-    }
-}
-
-
-function generateDummyCardRows(lengthStartRow) {
-    var cardRows = [];
-    var numberOfCards;
-    var currentCardRow;
-
-    var i;
-    var j;
-    //first row until 'equator' row included
-    for (i = 0; i < lengthStartRow; i++) {
-        numberOfCards = lengthStartRow + i;
-        currentCardRow = [];
-        for (j = 0; j < numberOfCards; j++) {
-            currentCardRow.push(i + "," + j);
+        //all rows below 'equator' row
+        for (i = lengthStartRow - 2; i > -1; i--) {
+            numberOfCards = lengthStartRow + i;
+            for (j = 0; j < numberOfCards; j++) {
+                cardStates.push( this.generateCardState((lengthStartRow + Math.abs(lengthStartRow - 2 - i)), j) );
+            }
         }
-        cardRows.push(currentCardRow);
+        return cardStates;
     }
-    //all rows below 'equator' row
-    for (i = lengthStartRow - 2; i > -1; i--) {
-        numberOfCards = lengthStartRow + i;
-        currentCardRow = [];
-        for (j = 0; j < numberOfCards; j++) {
-            currentCardRow.push(i + "," + j);
-        }
-        cardRows.push(currentCardRow);
+
+    generateCardState = (rowIndex, columnIndex) => {
+        return {rowIndex: rowIndex,
+            columnIndex: columnIndex,
+            visible: false,
+            ownerID: "",
+            vein: 0,
+            type: "UNDEFINED", //will contain String; one of: "normal", "food", "salt", "vinegar", "water", "dead"
+            protein: {},//will contain Object of: <color>(String) -> <amount>(int)
+            sugar: {}}
     }
-    return cardRows;
 }

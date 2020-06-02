@@ -1,24 +1,25 @@
 import React from 'react';
-import { Card } from './../card-component/card-component'
+import {Card} from '../card-component/card-component'
 
 export const BoardRow = (props) => {
 
+    if (!props.cardStates || props.cardStates.length === 0) {
+        return null;
+    }
+
+    var space = parseInt(props.spaceAmount) * 87; //half of hex width
+    space = space + 'px';
+
     var classNames = 'row';
-    //var space = parseInt(props.space) * 87 * props.scaleFactor; //half of hex width * scaleFactor
-    var space = parseInt(props.space) * 87; //half of hex width
-    if(props.even === 'true'){
+    if (props.evenFlag === "true") {
         classNames = classNames + ' even';
     }
-    const cards = [];
-    for(const [index, value] of props.cards.entries()){
-        cards.push(<Card/>);
-    }
-    var test = props.ref;
 
+    var sortedArray = props.cardStates.sort((cardState1,cardState2) => (cardState1.columnIndex - cardState2.columnIndex));
 
-    space = space + 'px'
     return  <div className={classNames} style={{marginLeft: `${space}`}}>
-                {cards}
+                {sortedArray.map(cardState => <Card key={cardState.rowIndex + "_" + cardState.columnIndex}
+                                                    cardState={cardState}
+                                                    onClickFunction={props.onClickFunction}/>)}
             </div>
-
 }
