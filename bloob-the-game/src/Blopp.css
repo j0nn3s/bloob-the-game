@@ -1,0 +1,21 @@
+.container {
+  background-color: greenyellow;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 4fr 1fr;
+}
+
+.player-container {
+  background-color: lightblue;
+  width:450px;
+  float: left;
+}
+.status {
+  background-color: red;
+  float: left;
+}
+.actions {
+  background-color: green;
+  float: left;
+}

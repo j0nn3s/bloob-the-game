@@ -1,0 +1,14 @@
+.board-container {
+    background-color: lightsalmon;
+    width :100%;
+    height: 100%
+}
+
+.row {
+    float: left;
+}
+
+.even {
+    margin-top: -53px;
+    height: 151px;
+}

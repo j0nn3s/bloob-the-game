@@ -1,30 +1,112 @@
 import React from 'react';
+import ReactDOM from 'react';
 import { BoardRow } from './../board-row-component/board-row-component'
 import "./board-component.css"
 
 
-export const Board = (props) => {
-    const threeElements = ['one', 'two', 'three'];
-    const fourElements = ['one', 'two', 'three', 'four'];
-    const fiveElements = ['one', 'two', 'three', 'four', 'five','six','seven'];
-    var cardElements = [];
-    for(var i = props.lengthStartRow; i < (Math.ceil(props.lengthStartRow * 1.5) + 1 ); i++){
-      var el = fiveElements.slice(0,i);
-      cardElements.push(el);
+export class Board extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            dimensions: {
+                width: 0,
+                height: 0,
+            }
+        };
+        this.convertCardRowsInBoardRows = this.convertCardRowsInBoardRows.bind(this);
     }
-    for(var j = (Math.ceil(props.lengthStartRow * 1.5))-1; j >= props.lengthStartRow; j--){
-      var el2 = fiveElements.slice(0,j);
-      cardElements.push(el2);
+
+    componentDidMount() {
+        //console.log(this.myBoard.current.offsetWidth)
+        //console.log(this.container.offsetWidth);
+
+        this.setState({
+            dimensions: {
+                width: this.container.offsetWidth,
+                height: this.container.offsetHeight,
+            },
+        });
     }
-    return <div className="board-container">
-              { cardElements.map(
-                cardE => (<BoardRow space={Math.abs(Math.ceil(props.lengthStartRow * 1.5)-(cardE.length)) / 2} cards={cardE} even={3 % 2 === 0 ? 'true': 'false'}></BoardRow>))
-              }
-              {/*<BoardRow space='1' cards={threeElements} even='false'></BoardRow>
-              <BoardRow space='0' cards={fourElements} even='true'></BoardRow>
-              <BoardRow space='0' cards={fiveElements} even='false'></BoardRow>
-              <BoardRow space='0' cards={fourElements} even='true'></BoardRow>
-              <BoardRow space='1' cards={threeElements} even='false'></BoardRow>*/}
-    
+
+    render() {
+
+        var lengthStartRowInt = parseInt(this.props.lengthStartRow);
+
+        var cardRows = generateDummyCardRows(lengthStartRowInt);
+
+        var scaleFactor = this.calculateScaleFactor(lengthStartRowInt, this.state.dimensions.width);
+
+        var boardRowArray = this.convertCardRowsInBoardRows(cardRows, scaleFactor);
+
+        var absoluteHeight = 200 * lengthStartRowInt + 100 * (lengthStartRowInt - 1);
+        var absoluteWidth = (174 * (lengthStartRowInt*2-1));
+        var scaleString = "scale(" + scaleFactor + ")";
+        var cssString = {
+            transform: scaleString,
+            height: absoluteHeight,
+            width: absoluteWidth
+        }
+
+        return <div className="board-container" ref={el => (this.container = el)}>
+            <div style={cssString}>
+                {boardRowArray}
             </div>
+        </div>
+
+    }
+
+    convertCardRowsInBoardRows(cardRows, scaleFactor) {
+        var boardRowArray = [];
+
+        var x;
+        var evenFlagString;
+        var spaceAmount;
+
+        for (x=0; x<cardRows.length; x++) {
+            evenFlagString = x % 2 === 1 ? "true": "false";
+            spaceAmount = cardRows.length - cardRows[x].length;
+            boardRowArray.push( <BoardRow cards={cardRows[x]}
+                                          space={spaceAmount}
+                                          even={evenFlagString}
+                                          scaleFactor={scaleFactor}/> );
+        }
+
+        return boardRowArray;
+    }
+
+    calculateScaleFactor(lengthStartRowInt, width) {
+        var maximumRowCardCount = (lengthStartRowInt * 2) - 1;
+        var maximumRowCardWidthTotal = (maximumRowCardCount * 174) + maximumRowCardCount;
+        return (width - 0) / maximumRowCardWidthTotal;
+    }
+}
+
+
+function generateDummyCardRows(lengthStartRow) {
+    var cardRows = [];
+    var numberOfCards;
+    var currentCardRow;
+
+    var i;
+    var j;
+    //first row until 'equator' row included
+    for (i = 0; i < lengthStartRow; i++) {
+        numberOfCards = lengthStartRow + i;
+        currentCardRow = [];
+        for (j = 0; j < numberOfCards; j++) {
+            currentCardRow.push(i + "," + j);
+        }
+        cardRows.push(currentCardRow);
+    }
+    //all rows below 'equator' row
+    for (i = lengthStartRow - 2; i > -1; i--) {
+        numberOfCards = lengthStartRow + i;
+        currentCardRow = [];
+        for (j = 0; j < numberOfCards; j++) {
+            currentCardRow.push(i + "," + j);
+        }
+        cardRows.push(currentCardRow);
+    }
+    return cardRows;
 }
