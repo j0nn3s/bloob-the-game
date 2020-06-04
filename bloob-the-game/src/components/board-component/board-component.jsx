@@ -1,8 +1,6 @@
 import React from 'react';
-import ReactDOM from 'react';
 import { BoardRow } from './../board-row-component/board-row-component'
 import "./board-component.css"
-import {Card} from "../card-component/card-component";
 
 
 export class Board extends React.Component {
@@ -10,11 +8,21 @@ export class Board extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            round: 0,
             dimensions: {
                 width: 0,
                 height: 0,
             },
-            cardsStates: []
+            cardsStates: [],
+            players: [{
+                id: 0,
+                name: "christian",
+                color: "#f00"
+            },{
+                id: 1,
+                name: "johannes",
+                color: "#0FF"
+            }]
         };
     }
 
@@ -34,7 +42,9 @@ export class Board extends React.Component {
 
     handleCardClick = (rowIndex, columnIndex) => {
         var qualifiedCards = this.state.cardsStates.filter(card => card.rowIndex === rowIndex).filter(card => card.columnIndex === columnIndex);
-        this.setState(qualifiedCards.map(card => card.visible = !card.visible));
+        this.setState(qualifiedCards.map(card => card.visible = !card.visible)); 
+        this.setState(qualifiedCards.map(card => card.ownerID = this.state.players.filter(player => player.id === parseInt(this.state.round) %2)));
+        this.setState({round: this.state.round +1});
         console.log("Clicked on: " + rowIndex + ", " + columnIndex);
     }
 
@@ -58,6 +68,7 @@ export class Board extends React.Component {
             spaceAmount = maxRowLength - rowCardStates.length;
             boardRowArray.push(<BoardRow key={"row_" + k}
                                          cardStates={rowCardStates}
+                                         owner={this.state.players[parseInt(this.state.round) % 2]}
                                          evenFlag={evenFlagString}
                                          spaceAmount={spaceAmount}
                                          onClickFunction={this.handleCardClick}/>);

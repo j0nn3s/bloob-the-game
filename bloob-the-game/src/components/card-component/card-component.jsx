@@ -6,7 +6,7 @@ export const Card = (props) => {
 
         var fillColor = "#123";
         if (props.cardState.visible) {
-            fillColor = "#00dd00";
+            fillColor = props.owner.color;
         }
 
         return <svg version="1.1"

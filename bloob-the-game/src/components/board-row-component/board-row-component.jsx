@@ -20,6 +20,7 @@ export const BoardRow = (props) => {
     return  <div className={classNames} style={{marginLeft: `${space}`}}>
                 {sortedArray.map(cardState => <Card key={cardState.rowIndex + "_" + cardState.columnIndex}
                                                     cardState={cardState}
+                                                    owner={props.owner}
                                                     onClickFunction={props.onClickFunction}/>)}
             </div>
 }
